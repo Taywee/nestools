@@ -1,0 +1,6 @@
+[package]
+name = "nestools"
+version = "0.1.0"
+authors = ["Taylor C. Richberger <Taywee@gmx.com>"]
+
+[dependencies]
