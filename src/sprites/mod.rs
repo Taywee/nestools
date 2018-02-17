@@ -37,6 +37,7 @@ pub struct Tile {
 }
 
 impl Tile {
+    /// Iterate over rows.  Each iteration is a row, and each row is an iterator over bytes.
     pub fn iter(&self) -> TileIterator {
         TileIterator {
             row: 0,
@@ -44,6 +45,7 @@ impl Tile {
         }
     }
 
+    /// Convert index bytes (like delivered from a png) into a Tile object
     pub fn from_bytes(bytes: &[u8], name: Option<&str>) -> Result<Tile, Error> {
         if bytes.len() != 64 {
             return Err(Error::DimensionsError(
@@ -154,7 +156,7 @@ pub struct PatternTable {
 
 
 impl PatternTable {
-    /// Loads in a sheet pattern table, and uses it to create a PatternTable.
+    /// Loads in a SheetPatternTable, and uses it to create a PatternTable.
     pub fn from_sheet_pattern_table(sheet_table: SheetPatternTable) -> Result<PatternTable, Error> {
         let mut left = Vec::new();
         let mut right = Vec::new();

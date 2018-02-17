@@ -147,6 +147,11 @@ pub trait LoadTiles {
     /// name of the image
     fn name<'a>(&'a self) -> &'a str;
 
+    /// Simply loads the image and pulls in the PNG data as tiles.
+    ///
+    /// No reordering or manipulation is done; they are returned in row-major order, and any
+    /// specific details in respect to things like animations or slices are taken into
+    /// consideration.  Those details are managed at a different level.
     fn load_tiles(&self) -> Result<Vec<Tile>, Error> {
         let width = self.sheet_width();
         let height = self.sheet_height();
