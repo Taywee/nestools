@@ -126,17 +126,19 @@ impl Animation {
     pub fn pull_tiles(&self) -> Result<Vec<Tile>, Error> {
         let tiles = self.load_tiles()?;
 
-        let x_width = self.frame_width * self.frames;
-
         let mut output = Vec::new();
 
+        let frame_tiles = self.frame_height * self.frame_width;
+
         for frame in 0..self.frames {
+            let frame_offset = frame * self.frame_width;
             for y in 0..self.frame_height {
+                let y_offset = y * (self.frame_width * self.frames);
                 for x in 0..self.frame_width {
-                    let mut tile_number = (frame * x) + (y * x_width) + x;
+                    let mut tile_number = frame_offset + y_offset + x;
                     let mut tile = tiles[tile_number].clone();
                     // Number of tile in this frame
-                    let frame_tile_number = y * x_width + x;
+                    let frame_tile_number = y * self.frame_width + x;
                     tile.name = Some(format!("{name}_{frame}_{tile}",
                         name = self.name,
                         frame = frame,
@@ -257,14 +259,16 @@ pub trait LoadTiles {
                     let mut tiles = Vec::new();
 
                     for row in 0..height {
-                        let x_offset = bitmap.width * row;
+                        let y_offset = bitmap.width * row * 8;
                         for column in 0..width {
-                            let offset = x_offset + column * 64;
-                            // TODO: this is broken.  Slices need to be iterators of iterators to
-                            // properly work.  Either that, or the array needs to be built on-hand.
-                            // These bytes are not contiguous.
-                            let slice = &bitmap.buffer[offset..(offset + 64)];
-                            tiles.push(Tile::from_bytes(slice, Some(self.name()))?);
+                            let x_offset = column * 8;
+
+                            let bytes: Vec<u8> = (0..8).flat_map(|line| {
+                                let offset = y_offset + x_offset + (line * bitmap.width);
+                                &bitmap.buffer[offset..(offset + 8)]
+                            }).cloned().collect();
+
+                            tiles.push(Tile::from_bytes(&bytes, Some(self.name()))?);
                         }
                     }
                     Ok(tiles)

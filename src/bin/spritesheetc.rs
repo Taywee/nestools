@@ -65,12 +65,5 @@ fn main() {
 
     let sheet_pattern_table: SheetPatternTable = serde_json::from_reader(input).unwrap();
     let pattern_table = PatternTable::from_sheet_pattern_table(sheet_pattern_table).unwrap();
-
-    let pixels: Vec<Vec<u8>> = pattern_table.left[0].iter().map(|row| row.collect()).collect();
-    for row in pixels {
-        for pixel in row {
-            print!("{}", pixel);
-        }
-        println!("");
-    }
+    pattern_table.write(&mut chr);
 }
