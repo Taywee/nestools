@@ -1,6 +1,6 @@
 [package]
 name = "nestools"
-version = "0.1.1"
+version = "1.0.0"
 authors = ["Taylor C. Richberger <Taywee@gmx.com>"]
 license = 'GPL-3.0'
 description = 'A set of Rust tools used to help make NES games, mostly used for tile compiling'
