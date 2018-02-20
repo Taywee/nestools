@@ -64,6 +64,45 @@ pub struct Tile {
 
 impl Tile {
     /// Iterate over rows.  Each iteration is a row, and each row is an iterator over bytes.
+    ///
+    /// Example, using [nesdev sprite](https://wiki.nesdev.com/w/index.php/PPU_pattern_tables):
+    ///
+    /// ```
+    /// use nestools::sprites::Tile;
+    ///
+    /// let tile = Tile {
+    ///     name: None,
+    ///     data: [
+    ///         0x41,
+    ///         0xC2,
+    ///         0x44,
+    ///         0x48,
+    ///         0x10,
+    ///         0x20,
+    ///         0x40,
+    ///         0x80,
+    ///         0x01,
+    ///         0x02,
+    ///         0x04,
+    ///         0x08,
+    ///         0x16,
+    ///         0x21,
+    ///         0x42,
+    ///         0x87,
+    ///     ]
+    /// };
+    /// let pixels: Vec<Vec<u8>> = tile.iter().map(|row| row.collect()).collect();
+    /// assert_eq!(pixels, [
+    ///     [0, 1, 0, 0, 0, 0, 0, 3],
+    ///     [1, 1, 0, 0, 0, 0, 3, 0],
+    ///     [0, 1, 0, 0, 0, 3, 0, 0],
+    ///     [0, 1, 0, 0, 3, 0, 0, 0],
+    ///     [0, 0, 0, 3, 0, 2, 2, 0],
+    ///     [0, 0, 3, 0, 0, 0, 0, 2],
+    ///     [0, 3, 0, 0, 0, 0, 2, 0],
+    ///     [3, 0, 0, 0, 0, 2, 2, 2],
+    /// ]);
+    /// ```
     pub fn iter(&self) -> TileIterator {
         TileIterator {
             row: 0,
@@ -72,6 +111,44 @@ impl Tile {
     }
 
     /// Convert index bytes (like delivered from a png) into a Tile object
+    ///
+    /// Example, using [nesdev sprite](https://wiki.nesdev.com/w/index.php/PPU_pattern_tables):
+    ///
+    /// ```
+    /// use nestools::sprites::Tile;
+    ///
+    /// let tile = Tile::from_bytes(&[
+    ///     0, 1, 0, 0, 0, 0, 0, 3,
+    ///     1, 1, 0, 0, 0, 0, 3, 0,
+    ///     0, 1, 0, 0, 0, 3, 0, 0,
+    ///     0, 1, 0, 0, 3, 0, 0, 0,
+    ///     0, 0, 0, 3, 0, 2, 2, 0,
+    ///     0, 0, 3, 0, 0, 0, 0, 2,
+    ///     0, 3, 0, 0, 0, 0, 2, 0,
+    ///     3, 0, 0, 0, 0, 2, 2, 2,
+    /// ], None).unwrap();
+    /// assert_eq!(
+    ///     tile.data,
+    ///     [
+    ///         0x41,
+    ///         0xC2,
+    ///         0x44,
+    ///         0x48,
+    ///         0x10,
+    ///         0x20,
+    ///         0x40,
+    ///         0x80,
+    ///         0x01,
+    ///         0x02,
+    ///         0x04,
+    ///         0x08,
+    ///         0x16,
+    ///         0x21,
+    ///         0x42,
+    ///         0x87,
+    ///     ]
+    /// );
+    /// ```
     pub fn from_bytes(bytes: &[u8], name: Option<&str>) -> Result<Tile, Error> {
         if bytes.len() != 64 {
             return Err(Error::DimensionsError(
@@ -236,85 +313,5 @@ impl PatternTable {
         for ref tile in &self.right {
             writer.write(&tile.data);
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    /// Validate that raw NES pattern table data can be converted to byte indexes for use in
-    /// generating PNGs
-    #[test]
-    fn chr_to_index() {
-        let tile = Tile {
-            name: None,
-            data: [
-                0x41,
-                0xC2,
-                0x44,
-                0x48,
-                0x10,
-                0x20,
-                0x40,
-                0x80,
-                0x01,
-                0x02,
-                0x04,
-                0x08,
-                0x16,
-                0x21,
-                0x42,
-                0x87,
-            ]
-        };
-        let pixels: Vec<Vec<u8>> = tile.iter().map(|row| row.collect()).collect();
-        assert_eq!(pixels, [
-            [0, 1, 0, 0, 0, 0, 0, 3],
-            [1, 1, 0, 0, 0, 0, 3, 0],
-            [0, 1, 0, 0, 0, 3, 0, 0],
-            [0, 1, 0, 0, 3, 0, 0, 0],
-            [0, 0, 0, 3, 0, 2, 2, 0],
-            [0, 0, 3, 0, 0, 0, 0, 2],
-            [0, 3, 0, 0, 0, 0, 2, 0],
-            [3, 0, 0, 0, 0, 2, 2, 2],
-        ]);
-    }
-
-    /// Validate that byte indexes, as loaded from a PNG, can be used to convert into NES pattern
-    /// table data
-    #[test]
-    fn index_to_chr() {
-        let tile = Tile::from_bytes(&[
-            0, 1, 0, 0, 0, 0, 0, 3,
-            1, 1, 0, 0, 0, 0, 3, 0,
-            0, 1, 0, 0, 0, 3, 0, 0,
-            0, 1, 0, 0, 3, 0, 0, 0,
-            0, 0, 0, 3, 0, 2, 2, 0,
-            0, 0, 3, 0, 0, 0, 0, 2,
-            0, 3, 0, 0, 0, 0, 2, 0,
-            3, 0, 0, 0, 0, 2, 2, 2,
-        ], None).unwrap();
-        assert_eq!(
-            tile.data,
-            [
-                0x41,
-                0xC2,
-                0x44,
-                0x48,
-                0x10,
-                0x20,
-                0x40,
-                0x80,
-                0x01,
-                0x02,
-                0x04,
-                0x08,
-                0x16,
-                0x21,
-                0x42,
-                0x87,
-            ]
-        );
     }
 }
