@@ -53,17 +53,55 @@ fn main() {
         None => Box::new(stdout()),
     };
 
-    let mut header: Option<File> = match matches.opt_str("c") {
-        Some(filename) => Some(File::create(filename).unwrap()),
+    let mut header: Option<(String, File)> = match matches.opt_str("c") {
+        Some(filename) => Some((filename.clone(), File::create(filename).unwrap())),
         None => None,
     };
 
-    let mut asm: Option<File> = match matches.opt_str("a") {
-        Some(filename) => Some(File::create(filename).unwrap()),
+    let mut asm: Option<(String, File)> = match matches.opt_str("a") {
+        Some(filename) => Some((filename.clone(), File::create(filename).unwrap())),
         None => None,
     };
 
     let sheet_pattern_table: SheetPatternTable = serde_json::from_reader(input).unwrap();
     let pattern_table = PatternTable::from_sheet_pattern_table(sheet_pattern_table).unwrap();
     pattern_table.write(&mut chr);
+
+    if let Some((filename, mut file)) = header {
+        let guard_string: String = filename.replace(".", "_").replace("/", "_").replace("\\", "_").to_uppercase();
+        let guard_string_fixed: String = guard_string.trim_matches('_').to_string();
+        writeln!(file, "#ifndef {}", guard_string_fixed);
+        writeln!(file, "#define {}", guard_string_fixed);
+        for (index, tile) in pattern_table.left.iter().enumerate() {
+            if let Some(ref name) = tile.name {
+                writeln!(file, "#define S_LEFT_{} {}", name, index);
+            }
+        }
+        for (index, tile) in pattern_table.right.iter().enumerate() {
+            if let Some(ref name) = tile.name {
+                writeln!(file, "#define S_RIGHT_{} {}", name, index);
+            }
+        }
+        writeln!(file, "#endif /* {} */", guard_string_fixed);
+        file.sync_all();
+    }
+
+    if let Some((filename, mut file)) = asm {
+        let guard_string: String = filename.replace(".", "_").replace("/", "_").replace("\\", "_").to_uppercase();
+        let guard_string_fixed: String = guard_string.trim_matches('_').to_string();
+        writeln!(file, ".ifndef {}", guard_string_fixed);
+        writeln!(file, "{} = 1", guard_string_fixed);
+        for (index, tile) in pattern_table.left.iter().enumerate() {
+            if let Some(ref name) = tile.name {
+                writeln!(file, "S_LEFT_{} = {}", name, index);
+            }
+        }
+        for (index, tile) in pattern_table.right.iter().enumerate() {
+            if let Some(ref name) = tile.name {
+                writeln!(file, "S_RIGHT_{} = {}", name, index);
+            }
+        }
+        writeln!(file, ".endif ; {}", guard_string_fixed);
+        file.sync_all();
+    }
 }

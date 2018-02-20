@@ -131,10 +131,13 @@ impl Animation {
         let frame_tiles = self.frame_height * self.frame_width;
 
         for frame in 0..self.frames {
+            // The frame offset is a simple x shift
             let frame_offset = frame * self.frame_width;
             for y in 0..self.frame_height {
+                // Y offset is a shift in the total width of the image
                 let y_offset = y * (self.frame_width * self.frames);
                 for x in 0..self.frame_width {
+                    // X offset is another simple x shift
                     let mut tile_number = frame_offset + y_offset + x;
                     let mut tile = tiles[tile_number].clone();
                     // Number of tile in this frame
