@@ -50,9 +50,11 @@
 //! }
 //! ```
 
+use super::{Tile, Error};
+
 /// A very simple sprite type.  Simply pulls in the tiles and numbers them.
 ///
-/// Generates defines named $name_$tilenumber.  The tilenumber is relative to the entire image.
+/// Generates defines named $name_$x_$y.  The tilenumber is relative to the top left of the image.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Simple {
     /// The png filename to pull in
@@ -62,10 +64,36 @@ pub struct Simple {
     pub name: String,
 
     /// The width of the whole image, in 8x8 tiles
-    pub width: u8,
+    pub width: usize,
 
     /// The height of the whole image, in 8x8 tiles
-    pub height: u8,
+    pub height: usize,
+}
+
+impl Simple {
+    /// Pulls the named tiles out of this simple sprite
+    pub fn pull_tiles(&self) -> Result<Vec<Tile>, Error> {
+        let tiles = self.load_tiles()?;
+
+        let mut output = Vec::new();
+
+        let width = self.width;
+        let height = self.height;
+
+        for y in 0..height {
+            for x in 0..width {
+                let mut tile_number = (y * width) + x;
+                let mut tile = tiles[tile_number].clone();
+                tile.name = Some(format!("{name}_{x}_{y}",
+                     name = self.name,
+                     x = x,
+                     y = y,
+                     ));
+                output.push(tile);
+            }
+        }
+        Ok(output)
+    }
 }
 
 /// An animation sprite type.  Used for creating sprites that are composed of multiple equal-sized
@@ -84,17 +112,47 @@ pub struct Animation {
     pub name: String,
 
     /// The width of a single frame, in 8x8 tiles
-    pub frame_width: u8,
+    pub frame_width: usize,
 
     /// The height of a single frame, in 8x8 tiles
-    pub frame_height: u8,
+    pub frame_height: usize,
 
     /// The number of frames in this animation
-    pub frames: u8,
+    pub frames: usize,
+}
+
+impl Animation {
+    /// Pulls the named tiles out of this animation
+    pub fn pull_tiles(&self) -> Result<Vec<Tile>, Error> {
+        let tiles = self.load_tiles()?;
+
+        let x_width = self.frame_width * self.frames;
+
+        let mut output = Vec::new();
+
+        for frame in 0..self.frames {
+            for y in 0..self.frame_height {
+                for x in 0..self.frame_width {
+                    let mut tile_number = (frame * x) + (y * x_width) + x;
+                    let mut tile = tiles[tile_number].clone();
+                    // Number of tile in this frame
+                    let frame_tile_number = y * x_width + x;
+                    tile.name = Some(format!("{name}_{frame}_{tile}",
+                        name = self.name,
+                        frame = frame,
+                        tile = frame_tile_number,
+                        ));
+                    output.push(tile);
+                }
+            }
+        }
+        Ok(output)
+    }
 }
 
 /// A sprite composed of "slices", for more fine-tuned separation of sprites (especially for
-/// partial animation) without having to drop into raw numbering.
+/// partial animation) without having to drop into raw numbering.  It's basically identical to
+/// Simple, but allowing you to organize it better yourself.
 ///
 /// Generates defines named $name_$slicenumber_$tilenumber.  Each tilenumber is specific to its
 /// slice, and is ordered in the order given in the slices.
@@ -107,13 +165,35 @@ pub struct Slice {
     pub name: String,
 
     /// The width of the whole image, in 8x8 tiles
-    pub width: u8,
+    pub width: usize,
 
     /// The height of the whole image, in 8x8 tiles
-    pub height: u8,
+    pub height: usize,
 
     /// Slices, indexed in row-major order
-    pub slices: Vec<Vec<u16>>,
+    pub slices: Vec<Vec<usize>>,
+}
+
+impl Slice {
+    /// Pulls the named tiles out of this slice
+    pub fn pull_tiles(&self) -> Result<Vec<Tile>, Error> {
+        let tiles = self.load_tiles()?;
+
+        let mut output = Vec::new();
+
+        for (slice_number, slice) in self.slices.iter().enumerate() {
+            for (tile_number, slice_tile) in slice.iter().enumerate() {
+                let mut tile = tiles[*slice_tile].clone();
+                tile.name = Some(format!("{name}_{slicenumber}_{tilenumber}",
+                     name = self.name,
+                     slicenumber = slice_number,
+                     tilenumber = tile_number,
+                     ));
+                output.push(tile);
+            }
+        }
+        Ok(output)
+    }
 }
 
 /// An enum used for differentiating sheets by type
@@ -132,14 +212,12 @@ pub struct SheetPatternTable {
     pub right: Vec<Sheet>,
 }
 
-use super::{Tile, Error};
-
 pub trait LoadTiles {
     /// width of the sheet in tiles
-    fn sheet_width(&self) -> u8;
+    fn sheet_width(&self) -> usize;
 
     /// height of the sheet in tiles
-    fn sheet_height(&self) -> u8;
+    fn sheet_height(&self) -> usize;
 
     /// path to the image
     fn image_path<'a>(&'a self) -> &'a str;
@@ -160,11 +238,11 @@ pub trait LoadTiles {
         match image_result {
             Ok(image) => {
                 if let ::lodepng::Image::RawData(bitmap) = image {
-                    if bitmap.width < width as usize * 8 {
+                    if bitmap.width < width * 8 {
                         return Err(Error::DimensionsError(
                                 format!("Image too thin, need {}, got {}.", width * 8, bitmap.width)
                                 ));
-                    } else if bitmap.height < height as usize * 8 {
+                    } else if bitmap.height < height * 8 {
                         return Err(Error::DimensionsError(
                                 format!("Image too short, need {}, got {}.", height * 8, bitmap.height)
                                 ));
@@ -179,9 +257,12 @@ pub trait LoadTiles {
                     let mut tiles = Vec::new();
 
                     for row in 0..height {
-                        let x_offset = bitmap.width * row as usize;
+                        let x_offset = bitmap.width * row;
                         for column in 0..width {
-                            let offset = x_offset + column as usize * 64;
+                            let offset = x_offset + column * 64;
+                            // TODO: this is broken.  Slices need to be iterators of iterators to
+                            // properly work.  Either that, or the array needs to be built on-hand.
+                            // These bytes are not contiguous.
                             let slice = &bitmap.buffer[offset..(offset + 64)];
                             tiles.push(Tile::from_bytes(slice, Some(self.name()))?);
                         }
@@ -199,10 +280,10 @@ pub trait LoadTiles {
 }
 
 impl LoadTiles for Simple {
-    fn sheet_width(&self) -> u8 {
+    fn sheet_width(&self) -> usize {
         self.width
     }
-    fn sheet_height(&self) -> u8 {
+    fn sheet_height(&self) -> usize {
         self.height
     }
     fn image_path<'a>(&'a self) -> &'a str {
@@ -214,10 +295,10 @@ impl LoadTiles for Simple {
 }
 
 impl LoadTiles for Animation {
-    fn sheet_width(&self) -> u8 {
+    fn sheet_width(&self) -> usize {
         self.frame_width * self.frames
     }
-    fn sheet_height(&self) -> u8 {
+    fn sheet_height(&self) -> usize {
         self.frame_height
     }
     fn image_path<'a>(&'a self) -> &'a str {
@@ -229,10 +310,10 @@ impl LoadTiles for Animation {
 }
 
 impl LoadTiles for Slice {
-    fn sheet_width(&self) -> u8 {
+    fn sheet_width(&self) -> usize {
         self.width
     }
-    fn sheet_height(&self) -> u8 {
+    fn sheet_height(&self) -> usize {
         self.height
     }
     fn image_path<'a>(&'a self) -> &'a str {

@@ -5,7 +5,9 @@
 pub mod sheet;
 use self::sheet::SheetPatternTable;
 use self::sheet::Sheet::*;
-use self::sheet::LoadTiles;
+use std::error;
+use std::fmt;
+use std::io::Write;
 
 type PNGError = ::lodepng::ffi::Error;
 
@@ -16,7 +18,7 @@ pub enum Error {
     /// If some io error occured opening or reading the image.  This just wraps lodepng::ffi::Error
     PNGError(PNGError),
 
-    /// If the image was not big enough
+    /// If the image was not big enough or too big
     DimensionsError(String),
 
     /// If the image is not a pallete  of exactly 4 colors
@@ -26,7 +28,31 @@ pub enum Error {
     FormatError(String),
 }
 
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let output: &str = match self {
+            &Error::PNGError(ref err) => err.as_str(),
+            &Error::DimensionsError(ref err) => &err,
+            &Error::PaletteError(ref err) => &err,
+            &Error::FormatError(ref err) => &err,
+        };
+        write!(f, "{}", output)
+    }
+}
+
+impl error::Error for Error {
+    fn description(&self) -> &str {
+        match self {
+            &Error::PNGError(ref err) => err.as_str(),
+            &Error::DimensionsError(ref err) => &err,
+            &Error::PaletteError(ref err) => &err,
+            &Error::FormatError(ref err) => &err,
+        }
+    }
+}
+
 /// A single tile, with an optional name
+#[derive(Clone, Debug)]
 pub struct Tile {
     /// The name of the tile.  This is the same given directly to the define for generated C and
     /// ASM headers.  If this is None, no name is output.
@@ -154,7 +180,6 @@ pub struct PatternTable {
     pub right: Vec<Tile>,
 }
 
-
 impl PatternTable {
     /// Loads in a SheetPatternTable, and uses it to create a PatternTable.
     pub fn from_sheet_pattern_table(sheet_table: SheetPatternTable) -> Result<PatternTable, Error> {
@@ -162,25 +187,55 @@ impl PatternTable {
         let mut right = Vec::new();
 
         for sheet in sheet_table.left {
-            match sheet {
-                Animation(sprite) => {
-                    let tiles = sprite.load_tiles()?;
-                },
-                Slice(sprite) => {
-                    let tiles = sprite.load_tiles()?;
-                },
-                Simple(sprite) => {
-                    let tiles = sprite.load_tiles()?;
-                },
-            }
+            let tiles = match sheet {
+                Animation(sprite) => sprite.pull_tiles(),
+                Slice(sprite) => sprite.pull_tiles(),
+                Simple(sprite) => sprite.pull_tiles(),
+            }?;
+            left.extend(tiles.into_iter());
+        }
+        for sheet in sheet_table.right {
+            let tiles = match sheet {
+                Animation(sprite) => sprite.pull_tiles(),
+                Slice(sprite) => sprite.pull_tiles(),
+                Simple(sprite) => sprite.pull_tiles(),
+            }?;
+            right.extend(tiles.into_iter());
         }
 
-        // TODO: EVERYTHING
+        if left.len() > 256 {
+            return Err(Error::DimensionsError(format!(
+                "left table contained too many tiles. Can not exceed 256, but has {}",
+                left.len())));
+        }
+        if right.len() > 256 {
+            return Err(Error::DimensionsError(format!(
+                "right table contained too many tiles. Can not exceed 256, but has {}",
+                right.len())));
+        }
+        let blank = Tile {name: None, data: [0u8; 16]};
+
+        // Pattern table must be tightly packed
+        while left.len() < 256 {
+            left.push(blank.clone());
+        }
+        while right.len() < 256 {
+            right.push(blank.clone());
+        }
 
         Ok(PatternTable {
             left,
             right
         })
+    }
+
+    pub fn write<T: Write>(&self, writer: &mut T) {
+        for ref tile in &self.left {
+            writer.write(&tile.data);
+        }
+        for ref tile in &self.right {
+            writer.write(&tile.data);
+        }
     }
 }
 
