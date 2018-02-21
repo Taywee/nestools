@@ -78,15 +78,14 @@ impl Animation {
         let tiles = self.load_tiles()?;
 
         let mut output = Vec::new();
-
-        let frame_tiles = self.frame_height * self.frame_width;
+        let sheet_width = self.frame_width * self.frames;
 
         for frame in 0..self.frames {
             // The frame offset is a simple x shift
             let frame_offset = frame * self.frame_width;
             for y in 0..self.frame_height {
                 // Y offset is a shift in the total width of the image
-                let y_offset = y * (self.frame_width * self.frames);
+                let y_offset = y * sheet_width;
                 for x in 0..self.frame_width {
                     // X offset is another simple x shift
                     let mut tile_number = frame_offset + y_offset + x;
@@ -154,6 +153,7 @@ impl Slice {
 
 /// An enum used for differentiating sheets by type
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "type")]
 pub enum Sheet {
     Animation(Animation),
     Slice(Slice),
@@ -190,7 +190,7 @@ pub trait LoadTiles {
         let width = self.sheet_width();
         let height = self.sheet_height();
 
-        let mut image_result = ::lodepng::decode_file(self.image_path(), ::lodepng::ffi::ColorType::PALETTE, 8);
+        let image_result = ::lodepng::decode_file(self.image_path(), ::lodepng::ffi::ColorType::PALETTE, 8);
         match image_result {
             Ok(image) => {
                 if let ::lodepng::Image::RawData(bitmap) = image {

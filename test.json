@@ -1,0 +1,33 @@
+{
+  "left": [
+    {
+      "type": "Animation",
+      "file": "test.png",
+      "frame_width": 2,
+      "frame_height": 3,
+      "frames": 3,
+      "name": "ANIMSPRITE"
+    },
+    {
+      "type": "Slice",
+      "file": "test.png",
+      "width": 6,
+      "height": 3,
+      "slices": [
+        [0, 2, 4],
+        [7, 9, 11],
+        [15]
+      ],
+      "name": "SLICESPRITE"
+    }
+  ],
+  "right": [
+    {
+      "type": "Simple",
+      "file": "test.png",
+      "width": 6,
+      "height": 3,
+      "name": "SIMPLESPRITE"
+    }
+  ]
+}

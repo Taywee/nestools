@@ -7,7 +7,7 @@ use self::sheet::SheetPatternTable;
 use self::sheet::Sheet::*;
 use std::error;
 use std::fmt;
-use std::io::Write;
+use std::io;
 
 type PNGError = ::lodepng::ffi::Error;
 
@@ -315,12 +315,13 @@ impl PatternTable {
         })
     }
 
-    pub fn write<T: Write>(&self, writer: &mut T) {
+    pub fn write<T: io::Write>(&self, writer: &mut T) -> Result<(), io::Error>{
         for ref tile in &self.left {
-            writer.write(&tile.data);
+            writer.write(&tile.data)?;
         }
         for ref tile in &self.right {
-            writer.write(&tile.data);
+            writer.write(&tile.data)?;
         }
+        Ok(())
     }
 }
