@@ -1,4 +1,18 @@
 //! Compiles spritesheets, using a meta file, into sets of headers and a chr file.
+//!
+//! The usage can be retrieved exactly how you'd expect:
+//!
+//! ```sh
+//! $ spritesheetc -h
+//! Usage: spritesheetc [options]
+//! 
+//! Options:
+//!     -i, --input INPUT   input json description file. Defaults to stdin.
+//!     -o, --char INPUT    output NES char file name. Defaults to stdout.
+//!     -c, --header INPUT  output C header file name
+//!     -a, --asm INPUT     output asm define file name
+//!     -h, --help          print this help menu
+//! ```
 
 extern crate nestools;
 extern crate getopts;

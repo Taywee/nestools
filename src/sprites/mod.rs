@@ -202,8 +202,11 @@ impl Tile {
     }
 }
 
-/// An iterator for iterating through rows of a tile.  This may be replaced in the future with a
-/// generated iterator.
+/// An iterator for iterating through rows of a tile.  This is created through a call of
+/// the [`iter`] method on [`Tile`].
+///
+/// [`iter`]: struct.Tile.html#method.iter
+/// [`Tile`]: struct.Tile.html
 pub struct TileIterator<'a> {
     row: u8,
     tile: &'a Tile,
@@ -227,7 +230,13 @@ impl<'a> Iterator for TileIterator<'a> {
     }
 }
 
-/// An iterator for iterating through a tile row.
+/// An iterator for iterating through a tile row.  This is yielded from iterations on
+/// [`TileIterator`], which is created through a call of the [`iter`] method on [`Tile`].
+///
+/// [`TileIterator`]: struct.TileIterator.html
+/// [`iter`]: struct.Tile.html#method.iter
+/// [`Tile`]: struct.Tile.html
+
 pub struct TileRowIterator {
     column: u8,
     bytes: (u8, u8),
