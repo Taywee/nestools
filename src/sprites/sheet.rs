@@ -1,54 +1,5 @@
 //! This module assists in compiling manageable png sprite sheets into NES-friendly CHR files and
 //! sets of headers that work with them.
-//!
-//! An example input might look something like this: 
-//!
-//! ```json
-//! {
-//!   "left": [
-//!     {
-//!       "Animation": {
-//!         "file": "first.png",
-//!         "frame_height": 2,
-//!         "frame_width": 2,
-//!         "frames": 4,
-//!         "name": "first"
-//!       }
-//!     },
-//!     {
-//!       "Slice": {
-//!         "file": "second.png",
-//!         "height": 4,
-//!         "name": "second",
-//!         "slices": [
-//!           [15, 12, 7],
-//!           [0, 4, 5]
-//!         ],
-//!         "width": 4
-//!       }
-//!     }
-//!   ],
-//!   "right": [
-//!     {
-//!       "Simple": {
-//!         "file": "third.png",
-//!         "height": 8,
-//!         "name": "third",
-//!         "width": 8
-//!       }
-//!     },
-//!     {
-//!       "Animation": {
-//!         "file": "fourth.png",
-//!         "frame_height": 4,
-//!         "frame_width": 3,
-//!         "frames": 3,
-//!         "name": "fourth"
-//!       }
-//!     }
-//!   ]
-//! }
-//! ```
 
 use super::{Tile, Error};
 
