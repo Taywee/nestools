@@ -1,7 +1,7 @@
 extern crate nestools;
 extern crate getopts;
 
-use nestools::spritesheetc::{Config, run};
+use nestools::binaries::spritesheetc::{Config, run};
 use getopts::Options;
 use std::env;
 use std::process;
