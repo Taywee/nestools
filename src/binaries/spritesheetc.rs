@@ -67,7 +67,7 @@
 //! order, tightly-packed, and the remaining tiles are filled with blanks.  All file paths are
 //! processed relative to your current working directory.
 //!
-//! ### Types
+//! # Types
 //!
 //! Each type is specified in the individual sprite's `type` attribute.  All types have a `file`
 //! field and a `name` field.  The `file` field is the png file that the sprite is extracted from.
@@ -81,26 +81,26 @@
 //! "sprites", and they pull in "sheets", in order to generate "tiles", and header files with names
 //! referring to the indices of the "tiles" in their respective pattern table.
 //!
-//! #### Simple
+//! ## Simple
 //!
 //! The simplest sprite type, typically useful for individual 8x8 tiles that are related and may be
 //! useful to be contiguous, such as numbers or alphabet tiles, or sets of scenery tiles for laying
 //! out.  The sprite sheet is used as a whole, and numbered from left-to-right, top-to-bottom.
 //!
-//! ##### Attributes
+//! ### Attributes
 //!
 //! * `height`
 //!     * The height of the sheet in tiles (that is, in `pixels / 8`)
 //! * `width`
 //!     * The width of the sheet in tiles (that is, in `pixels / 8`)
 //!
-//! ##### Name
+//! ### Name
 //!
 //! This sprite's parts in the files generated will be
 //! `{PREFIX}{SHEET}_{NAME}_{TILE}`, where `TILE` ranges from `0` up to but not including `hight *
 //! width`.
 //!
-//! #### Animation
+//! ## Animation
 //!
 //! A type that is used for animated sprites of a solid size.  This isn't ideal for things like
 //! Mega Man, which use partially-animated sprites to save space.  It works fine for things like
@@ -111,7 +111,7 @@
 //! divided into `frames` frames each `frame_width` in width, which are then divided into
 //! `frame_width * frame_height` tiles each.
 //!
-//! ##### Attributes
+//! ### Attributes
 //!
 //! * `frame_height`
 //!     * The height of an individual frame in tiles (that is, in `pixels / 8`)
@@ -122,7 +122,7 @@
 //!
 //! The total width of the sheet in pixels is therefore `8 * frame_width * frames`
 //!
-//! ##### Name
+//! ### Name
 //!
 //! This sprite's parts in the files generated will be
 //! `{PREFIX}{SHEET}_{NAME}_{FRAME}_{FRAMETILE}`, where `FRAME` ranges from `0` up to but not
@@ -130,7 +130,7 @@
 //! but not including `frame_width * frame_height`, arranged within the frame left-to-right and
 //! top-to-bottom.
 //!
-//! #### Slice
+//! ## Slice
 //!
 //! A sprite type for frames that should be divided into chunks, like `Animation`, but not chunks
 //! that can easily be laid out in the same arrangement or aren't all necessarily the same size.
@@ -142,7 +142,7 @@
 //! like in your sheet and not worry about blank space, which won't take up space in your pattern
 //! table.
 //!
-//! ##### Attributes
+//! ### Attributes
 //!
 //! * `height`
 //!     * The height of the sheet in tiles (that is, in `pixels / 8`)
@@ -154,7 +154,7 @@
 //!
 //! The total width of the sheet in pixels is therefore `8 * frame_width * frames`
 //!
-//! ##### Name
+//! ### Name
 //!
 //! This sprite's parts in the files generated will be
 //! `{PREFIX}{SHEET}_{NAME}_{SLICE}_{SLICETILE}`, where `SLICE` ranges from `0` up to but not
