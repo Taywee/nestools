@@ -277,6 +277,7 @@ impl PatternTable {
                 Animation(sprite) => sprite.pull_tiles(),
                 Slice(sprite) => sprite.pull_tiles(),
                 Simple(sprite) => sprite.pull_tiles(),
+                Fill(sprite) => sprite.pull_tiles(),
             }?;
             left.extend(tiles.into_iter());
         }
@@ -285,6 +286,7 @@ impl PatternTable {
                 Animation(sprite) => sprite.pull_tiles(),
                 Slice(sprite) => sprite.pull_tiles(),
                 Simple(sprite) => sprite.pull_tiles(),
+                Fill(sprite) => sprite.pull_tiles(),
             }?;
             right.extend(tiles.into_iter());
         }

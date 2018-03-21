@@ -3,6 +3,39 @@
 
 use super::{Tile, Error};
 
+use std::iter;
+
+/// The simplest sprite type.  Fills the tile with its value
+///
+/// Generates defines named $name.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Fill {
+    /// The value to fill in; must be 0-3, inclusive
+    pub value: u8,
+
+    /// The name, used for generation of the C and ASM definition headers
+    pub name: String,
+
+    /// The number of tiles to generate
+    pub count: usize,
+}
+
+impl Fill {
+    /// Pulls the named tiles out of this simple sprite
+    pub fn pull_tiles(&self) -> Result<Vec<Tile>, Error> {
+        if self.value > 3 {
+            return Err(Error::FormatError(
+                format!("Value must be between 0 and 3, but was {}", self.value)
+            ));
+        }
+        let data: Vec<u8> = iter::repeat(self.value).take(64).collect();
+        let tile = Tile::from_bytes(&data, Some(&self.name))?;
+        let output: Vec<Tile> = iter::repeat(tile).take(self.count).collect();
+
+        Ok(output)
+    }
+}
+
 /// A very simple sprite type.  Simply pulls in the tiles and numbers them.
 ///
 /// Generates defines named $name_$x_$y.  The tilenumber is relative to the top left of the image.
@@ -158,6 +191,7 @@ pub enum Sheet {
     Animation(Animation),
     Slice(Slice),
     Simple(Simple),
+    Fill(Fill),
 }
 
 /// A sheet pattern table, for organizing sprite sheets by order into their appropriate table
