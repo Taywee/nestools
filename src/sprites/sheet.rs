@@ -77,10 +77,9 @@ impl Simple {
             for x in 0..width {
                 let mut tile_number = (y * width) + x;
                 let mut tile = tiles[tile_number].clone();
-                tile.name = Some(format!("{name}_{x}_{y}",
+                tile.name = Some(format!("{name}_{num}",
                      name = self.name,
-                     x = x,
-                     y = y,
+                     num = tile_number,
                      ));
                 output.push(tile);
             }

@@ -43,6 +43,11 @@
 //!   ],
 //!   "right": [
 //!     {
+//!       "type": "Fill",
+//!       "value": 0,
+//!       "count": 1
+//!     },
+//!     {
 //!       "type": "Simple",
 //!       "file": "third.png",
 //!       "height": 8,
@@ -81,11 +86,32 @@
 //! "sprites", and they pull in "sheets", in order to generate "tiles", and header files with names
 //! referring to the indices of the "tiles" in their respective pattern table.
 //!
+//! ## Fill
+//!
+//! The simplest sprite type.  Simply uses the value given and fills the tile with it.  Useful for
+//! blank background tiles, solid fill tiles that don't need files, and for explicitly spacing out
+//! other tiles (though that shouldn't be very useful).  Primarily, it's just a filler to make it
+//! easy to default all background tiles to a blank background while selectively filling real
+//! background tiles where needed.
+//!
+//! ### Attributes
+//!
+//! * `value`
+//!     * A value from 0 to 3 inclusive, stating which index to use to fill the tile.
+//! * `count`
+//!     * The number of tiles to fill with this value.
+//!
+//! ### Name
+//!
+//! This sprite's parts in the files generated will be
+//! `{PREFIX}{SHEET}_{NAME}_{TILE}`, where `TILE` ranges from `0` up to but not including `count`.
+//!
 //! ## Simple
 //!
-//! The simplest sprite type, typically useful for individual 8x8 tiles that are related and may be
-//! useful to be contiguous, such as numbers or alphabet tiles, or sets of scenery tiles for laying
-//! out.  The sprite sheet is used as a whole, and numbered from left-to-right, top-to-bottom.
+//! The simplest file sprite type, typically useful for individual 8x8 tiles that are related and
+//! may be useful to be contiguous, such as numbers or alphabet tiles, or sets of scenery tiles for
+//! laying out.  The sprite sheet is used as a whole, and numbered from left-to-right,
+//! top-to-bottom.
 //!
 //! ### Attributes
 //!
@@ -97,7 +123,7 @@
 //! ### Name
 //!
 //! This sprite's parts in the files generated will be
-//! `{PREFIX}{SHEET}_{NAME}_{TILE}`, where `TILE` ranges from `0` up to but not including `hight *
+//! `{PREFIX}{SHEET}_{NAME}_{TILE}`, where `TILE` ranges from `0` up to but not including `height *
 //! width`.
 //!
 //! ## Animation
