@@ -7,7 +7,7 @@ use std::iter;
 
 /// The simplest sprite type.  Fills the tile with its value
 ///
-/// Generates defines named $name.
+/// Generates defines named $name_$number.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Fill {
     /// The value to fill in; must be 0-3, inclusive
@@ -29,8 +29,17 @@ impl Fill {
             ));
         }
         let data: Vec<u8> = iter::repeat(self.value).take(64).collect();
-        let tile = Tile::from_bytes(&data, Some(&self.name))?;
-        let output: Vec<Tile> = iter::repeat(tile).take(self.count).collect();
+        let mut output = Vec::new();
+        for num in 0..self.count {
+            let tile = Tile::from_bytes(
+                &data,
+                Some(&format!(
+                    "{name}_{num}",
+                    name=self.name,
+                    num=num,
+                    )))?;
+            output.push(tile);
+        }
 
         Ok(output)
     }
