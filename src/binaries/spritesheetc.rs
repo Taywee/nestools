@@ -7,7 +7,7 @@
 //! Usage: spritesheetc [options]
 //! 
 //! Options:
-//!     -i, --input FILE    input json description file. Defaults to stdin.
+//!     -i, --input FILE    input yaml description file. Defaults to stdin.
 //!     -o, --char FILE     output NES char file name. Defaults to stdout.
 //!     -c, --header FILE   output C header file name.  Not generated if not specified.
 //!     -a, --asm FILE      output asm header file name.  Not generated if not specified.
@@ -15,55 +15,40 @@
 //!     -h, --help          print this help menu
 //! ```
 //!
-//! The format of the input file should be a JSON file that is deserializable by serde_json.  An
+//! The format of the input file should be a JSON file that is deserializable by serde_yaml.  An
 //! example input might look something like this: 
 //!
-//! ```json
-//! {
-//!   "left": [
-//!     {
-//!       "type": "Animation",
-//!       "file": "first.png",
-//!       "frame_height": 2,
-//!       "frame_width": 2,
-//!       "frames": 4,
-//!       "name": "first"
-//!     },
-//!     {
-//!       "type": "Slice",
-//!       "file": "second.png",
-//!       "height": 4,
-//!       "name": "second",
-//!       "slices": [
-//!         [15, 12, 7],
-//!         [0, 4, 5]
-//!       ],
-//!       "width": 4
-//!     }
-//!   ],
-//!   "right": [
-//!     {
-//!       "type": "Fill",
-//!       "value": 0,
-//!       "count": 1
-//!     },
-//!     {
-//!       "type": "Simple",
-//!       "file": "third.png",
-//!       "height": 8,
-//!       "name": "third",
-//!       "width": 8
-//!     },
-//!     {
-//!       "type": "Animation",
-//!       "file": "fourth.png",
-//!       "frame_height": 4,
-//!       "frame_width": 3,
-//!       "frames": 3,
-//!       "name": "fourth"
-//!     }
-//!   ]
-//! }
+//! ```yaml
+//! left:
+//!   - type: Animation
+//!     file: first.png
+//!     frame_height: 2
+//!     frame_width: 2
+//!     frames: 4
+//!     name: first
+//!   - type: Slice
+//!     file: second.png
+//!     height: 4
+//!     name: second
+//!     slices:
+//!       - [15, 12, 7]
+//!       - [0, 4, 5]
+//!     width: 4
+//! right:
+//!   - type: Fill
+//!     value: 0
+//!     count: 1
+//!   - type: Simple
+//!     file: third.png
+//!     height: 8
+//!     name: third
+//!     width: 8
+//!   - type: Animation
+//!     file: fourth.png
+//!     frame_height: 4
+//!     frame_width: 3
+//!     frames: 3
+//!     name: fourth
 //! ```
 //!
 //! The sheet types are described in in
@@ -188,7 +173,7 @@
 //! from `0` up to but not including the size of the slice in question, also in the order
 //! specified.
 
-extern crate serde_json;
+extern crate serde_yaml;
 
 use std::io::{self, stdin, stdout, Read, Write};
 use std::fs::File;
@@ -313,7 +298,7 @@ pub fn run(config: Config) -> Result<(), Box<error::Error>> {
 
     let prefix = config.prefix;
 
-    let sheet_pattern_table: SheetPatternTable = match serde_json::from_reader(input) {
+    let sheet_pattern_table: SheetPatternTable = match serde_yaml::from_reader(input) {
         Ok(table) => table,
         Err(err) => return Err(Error::boxed("Error loading JSON", err)),
     };

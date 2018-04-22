@@ -16,7 +16,7 @@ fn main() {
     let mut opts = Options::new();
     let program = args[0].clone();
 
-    opts.optopt("i", "input", "input json description file.  Defaults to stdin.", "FILE");
+    opts.optopt("i", "input", "input yaml description file.  Defaults to stdin.", "FILE");
     opts.optopt("o", "char", "output NES char file name. Defaults to stdout.", "FILE");
     opts.optopt("c", "header", "output C header file name", "FILE");
     opts.optopt("a", "asm", "output asm header file name", "FILE");
