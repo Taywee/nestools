@@ -15,7 +15,7 @@
 //!     -h, --help          print this help menu
 //! ```
 //!
-//! The format of the input file should be a JSON file that is deserializable by serde_yaml.  An
+//! The format of the input file should be a YAML file that is deserializable by serde_yaml.  An
 //! example input might look something like this: 
 //!
 //! ```yaml
@@ -283,7 +283,7 @@ pub fn run(config: Config) -> Result<(), Box<error::Error>> {
     let input: Box<Read> = match config.input {
         Some(filename) => match File::open(filename) {
             Ok(file) => Box::new(file),
-            Err(err) => return Err(Error::boxed("Error opening input JSON file", err)),
+            Err(err) => return Err(Error::boxed("Error opening input YAML file", err)),
         },
         None => Box::new(stdin()),
     };
@@ -300,7 +300,7 @@ pub fn run(config: Config) -> Result<(), Box<error::Error>> {
 
     let sheet_pattern_table: SheetPatternTable = match serde_yaml::from_reader(input) {
         Ok(table) => table,
-        Err(err) => return Err(Error::boxed("Error loading JSON", err)),
+        Err(err) => return Err(Error::boxed("Error loading YAML", err)),
     };
 
     let pattern_table = match PatternTable::from_sheet_pattern_table(sheet_pattern_table) {
