@@ -1,7 +1,7 @@
 extern crate nestools;
 extern crate getopts;
 
-use nestools::binaries::spritesheetc::{Config, run};
+use nestools::binaries::stagec::{Config, run};
 use getopts::Options;
 use std::env;
 use std::process;
@@ -17,10 +17,9 @@ fn main() {
     let program = args[0].clone();
 
     opts.optopt("i", "input", "input yaml description file.  Defaults to stdin.", "FILE");
-    opts.optopt("o", "char", "output NES char file name. Defaults to stdout.", "FILE");
-    opts.optopt("c", "header", "output C header file name", "FILE");
-    opts.optopt("a", "asm", "output asm header file name", "FILE");
-    opts.optopt("p", "prefix", "the prefix for the header defines", "PREFIX");
+    opts.optopt("s", "stage", "output NES stage binary file name. Defaults to stdout.", "FILE");
+    opts.optopt("c", "c", "output C files basename", "BASENAME");
+    opts.optopt("a", "asm", "output ASM files basename", "BASENAME");
     opts.optflag("h", "help", "print this help menu");
 
     let matches = match opts.parse(&args[1..]) {
@@ -39,13 +38,9 @@ fn main() {
 
     let config = Config {
         input:  matches.opt_str("i"),
-        chr: matches.opt_str("o"),
-        header: matches.opt_str("c"),
+        stage: matches.opt_str("s"),
+        c: matches.opt_str("c"),
         asm: matches.opt_str("a"),
-        prefix: match matches.opt_str("p") {
-            Some(prefix) => prefix,
-            None => String::new(),
-        },
     };
 
     if let Err(output) = run(config) {

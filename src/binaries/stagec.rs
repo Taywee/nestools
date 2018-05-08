@@ -1,4 +1,5 @@
-//! The sprite sheet compiler, for compiling a set of sprite sheets into a pattern table and C/ASM headers.
+//! The stage file compiler,  as used by evy.  May be used in a build system to compile ascii stage
+//! descriptions (in YAML format) into stage stubs, with an automatically-inserted stub library.
 //! 
 //! The usage can be retrieved exactly how you'd expect:
 //! 
@@ -9,9 +10,8 @@
 //! Options:
 //!     -i, --input FILE    input yaml description file. Defaults to stdin.
 //!     -o, --char FILE     output NES char file name. Defaults to stdout.
-//!     -c, --header FILE   output C header file name.  Not generated if not specified.
-//!     -a, --asm FILE      output asm header file name.  Not generated if not specified.
-//!     -p, --prefix PREFIX the prefix for the header defines.  Defaults to blank.
+//!     -c, --c FILE        output C files basename.  Not generated if not specified.
+//!     -a, --asm FILE      output asm file basenames.  Not generated if not specified.
 //!     -h, --help          print this help menu
 //! ```
 //!
