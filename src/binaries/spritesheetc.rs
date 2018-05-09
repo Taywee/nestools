@@ -177,11 +177,10 @@ extern crate serde_yaml;
 
 use std::io::{self, stdin, stdout, Read, Write};
 use std::fs::File;
-use std::error;
-use std::fmt;
 
 use ::sprites::serialize::SheetPatternTable;
 use ::sprites::PatternTable;
+use super::Error;
 
 /// Config type, built from command line or however you'd like.
 pub struct Config {
@@ -190,33 +189,6 @@ pub struct Config {
     pub header: Option<String>,
     pub asm: Option<String>,
     pub prefix: String,
-}
-
-/// Simple boxing error type for easier handling.
-#[derive(Debug)]
-pub struct Error {
-    description: String,
-}
-
-impl Error {
-    /// Allow converting another error type into this error type
-    pub fn new<T: error::Error>(description: &str, error: T) -> Error {
-        Error {
-            description: format!("{}: {}", description, error),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        &self.description
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description)
-    }
 }
 
 /// Write out the C header file.  This is used as an easy grouping mechanism in order to catch all

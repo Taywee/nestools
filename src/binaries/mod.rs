@@ -7,3 +7,33 @@
 
 pub mod spritesheetc;
 pub mod stagec;
+
+use std::error;
+use std::fmt;
+
+/// Simple centralized error type for easier handling.
+#[derive(Debug)]
+pub struct Error {
+    description: String,
+}
+
+impl Error {
+    /// Allow converting another error type into this error type
+    pub fn new<T: error::Error>(description: &str, error: T) -> Error {
+        Error {
+            description: format!("{}: {}", description, error),
+        }
+    }
+}
+
+impl error::Error for Error {
+    fn description(&self) -> &str {
+        &self.description
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.description)
+    }
+}
