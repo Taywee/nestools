@@ -1,10 +1,9 @@
-//! Tools for working with sprites.  This is primarily used to compile PNG sprite sheets into
-//! nametables and generate symbols for them.
+//! Tools for working with stages.
 //!
 
-pub mod serialize;
-use self::serialize::SheetPatternTable;
-use self::serialize::Sheet::*;
+pub mod sheet;
+use self::sheet::SheetPatternTable;
+use self::sheet::Sheet::*;
 use std::error;
 use std::fmt;
 use std::io;

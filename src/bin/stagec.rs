@@ -18,8 +18,6 @@ fn main() {
 
     opts.optopt("i", "input", "input yaml description file.  Defaults to stdin.", "FILE");
     opts.optopt("s", "stage", "output NES stage binary file name. Defaults to stdout.", "FILE");
-    opts.optopt("c", "c", "output C files basename", "BASENAME");
-    opts.optopt("a", "asm", "output ASM files basename", "BASENAME");
     opts.optflag("h", "help", "print this help menu");
 
     let matches = match opts.parse(&args[1..]) {
@@ -39,8 +37,6 @@ fn main() {
     let config = Config {
         input:  matches.opt_str("i"),
         stage: matches.opt_str("s"),
-        c: matches.opt_str("c"),
-        asm: matches.opt_str("a"),
     };
 
     if let Err(output) = run(config) {

@@ -6,3 +6,4 @@
 //! list of submodules here is a good summary of the binaries shipped by this package.
 
 pub mod spritesheetc;
+pub mod stagec;
