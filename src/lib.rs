@@ -14,6 +14,7 @@ extern crate serde_derive;
 extern crate lodepng;
 
 pub mod sprites;
+pub mod stage;
 
 // Binary entrypoints
 pub mod binaries;

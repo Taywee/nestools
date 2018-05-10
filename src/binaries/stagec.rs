@@ -20,6 +20,8 @@ use std::fs::File;
 
 use super::Error;
 
+use ::stage::serialize;
+
 /// Config type, built from command line or however you'd like.
 pub struct Config {
     pub input: Option<String>,
@@ -35,6 +37,13 @@ pub fn run(config: Config) -> Result<(), Error> {
         },
         None => Box::new(stdin()),
     };
+
+    let stage: serialize::Stage = match serde_yaml::from_reader(input) {
+        Ok(stage) => stage,
+        Err(err) => return Err(Error::new("Error loading YAML", err)),
+    };
+
+    println!("{:?}", stage);
 
     Ok(())
 }

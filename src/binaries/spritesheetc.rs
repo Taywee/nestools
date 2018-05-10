@@ -178,7 +178,7 @@ extern crate serde_yaml;
 use std::io::{self, stdin, stdout, Read, Write};
 use std::fs::File;
 
-use ::sprites::serialize::SheetPatternTable;
+use ::sprites::serialize;
 use ::sprites::PatternTable;
 use super::Error;
 
@@ -271,7 +271,7 @@ pub fn run(config: Config) -> Result<(), Error> {
 
     let prefix = config.prefix;
 
-    let sheet_pattern_table: SheetPatternTable = match serde_yaml::from_reader(input) {
+    let sheet_pattern_table: serialize::SheetPatternTable = match serde_yaml::from_reader(input) {
         Ok(table) => table,
         Err(err) => return Err(Error::new("Error loading YAML", err)),
     };
