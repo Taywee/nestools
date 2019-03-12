@@ -173,13 +173,11 @@
 //! from `0` up to but not including the size of the slice in question, also in the order
 //! specified.
 
-extern crate serde_yaml;
-
 use std::io::{self, stdin, stdout, Read, Write};
 use std::fs::File;
 
-use ::sprites::serialize;
-use ::sprites::PatternTable;
+use crate::sprites::serialize;
+use crate::sprites::PatternTable;
 use super::Error;
 
 /// Config type, built from command line or however you'd like.

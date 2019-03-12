@@ -75,7 +75,7 @@ impl Simple {
 
         for y in 0..height {
             for x in 0..width {
-                let mut tile_number = (y * width) + x;
+                let tile_number = (y * width) + x;
                 let mut tile = tiles[tile_number].clone();
                 tile.name = Some(format!("{name}_{num}",
                      name = self.name,
@@ -129,7 +129,7 @@ impl Animation {
                 let y_offset = y * sheet_width;
                 for x in 0..self.frame_width {
                     // X offset is another simple x shift
-                    let mut tile_number = frame_offset + y_offset + x;
+                    let tile_number = frame_offset + y_offset + x;
                     let mut tile = tiles[tile_number].clone();
                     // Number of tile in this frame
                     let frame_tile_number = y * self.frame_width + x;

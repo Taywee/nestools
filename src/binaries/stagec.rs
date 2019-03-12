@@ -13,14 +13,12 @@
 //!     -h, --help          print this help menu
 //! ```
 
-extern crate serde_yaml;
-
 use std::io::{stdin, Read};
 use std::fs::File;
 
 use super::Error;
 
-use ::stage::serialize;
+use crate::stage::serialize;
 
 /// Config type, built from command line or however you'd like.
 pub struct Config {
@@ -43,7 +41,7 @@ pub fn run(config: Config) -> Result<(), Error> {
         Err(err) => return Err(Error::new("Error loading YAML", err)),
     };
 
-    println!("{:?}", stage);
+    stage.write_binary(&mut std::io::stdout());
 
     Ok(())
 }

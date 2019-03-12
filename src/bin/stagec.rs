@@ -1,6 +1,3 @@
-extern crate nestools;
-extern crate getopts;
-
 use nestools::binaries::stagec::{Config, run};
 use getopts::Options;
 use std::env;
