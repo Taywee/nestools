@@ -10,6 +10,8 @@ pub mod stagec;
 
 use std::error;
 use std::fmt;
+use std::convert::From;
+use std::io;
 
 /// Simple centralized error type for easier handling.
 #[derive(Debug)]
@@ -23,6 +25,12 @@ impl Error {
         Error {
             description: format!("{}: {}", description, error),
         }
+    }
+}
+
+impl From<io::Error> for Error {
+    fn from(error: io::Error) -> Self {
+        Error::new("IO Error", error)
     }
 }
 

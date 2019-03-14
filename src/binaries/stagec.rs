@@ -41,7 +41,7 @@ pub fn run(config: Config) -> Result<(), Error> {
         Err(err) => return Err(Error::new("Error loading YAML", err)),
     };
 
-    stage.write_binary(&mut std::io::stdout());
+    stage.write_binary(&mut std::io::stdout())?;
 
     Ok(())
 }

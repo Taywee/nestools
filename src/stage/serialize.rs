@@ -3,8 +3,8 @@
 
 use std::io::Write;
 use std::io::Result;
-use std::collections::HashMap;
 use std::default::Default;
+use std::collections::HashMap;
 
 /// Orientation enum for setting orientation
 #[derive(Serialize, Deserialize, Debug)]
@@ -49,21 +49,80 @@ pub struct Stage {
     pub data: String,
 }
 
-impl Stage {
-    pub fn write_binary(&self, write: &mut Write) -> Result<()> {
-        // This stuff so far is building a vector of chars by transposing characters.
-        let mut iterators: Vec<_> = self.data.lines().map(|line| line.chars()).collect();
-        let mut chars = Vec::new();
-        'outer: loop {
-            for mut iterator in &mut iterators {
-                if let Some(c) = iterator.next() {
-                    chars.push(c);
-                } else {
-                    break 'outer;
+// Take a slice of chars and return a RLE-compressed version of it
+fn run_length_encode(chars: &[char], limit: u16) -> Vec<(char, u16)> {
+    let mut output = Vec::new();
+    if chars.len() > 0 {
+        let mut current = chars[0];
+        let mut count = 1;
+        for &c in &chars[1..] {
+            if c == current {
+                count += 1;
+                if count == limit {
+                    output.push((current, count));
+                    // Reset this character to ensure we restart at 1 for the next character
+                    current = '\0';
+                    count = 0;
                 }
+            } else {
+                if count > 0 {
+                    output.push((current, count));
+                }
+                current = c;
+                count = 1;
             }
         }
-        println!("{:?}", chars);
+        if count > 0 {
+            output.push((current, count));
+        }
+    }
+    output
+}
+
+impl Stage {
+    pub fn write_binary(&self, write: &mut Write) -> Result<()> {
+        let mut metatiles = HashMap::new();
+        for (i, metatile) in self.metatiles.iter().enumerate() {
+            metatiles.insert(metatile.symbol, i);
+        }
+
+        // Write background palette 
+        // Write sprite palette
+        // Write background tile definitions
+        // Write stage body
+        let mut iterators: Vec<_> = self.data.lines().map(|line| line.chars()).collect();
+        let mut chars = Vec::new();
+        match &self.orientation {
+            // Build a vector of chars by transposing characters.
+            Orientation::Horizontal => 'outer: loop {
+                for iterator in &mut iterators {
+                    if let Some(c) = iterator.next() {
+                        chars.push(c);
+                    } else {
+                        break 'outer;
+                    }
+                }
+            },
+            // Do straight composition
+            Orientation::Vertical => for iterator in iterators {
+                for c in iterator {
+                    chars.push(c);
+                }
+            },
+        }
+
+        // Run-length encode and write stage body
+        let encoded = run_length_encode(&chars, 16);
+        let mut outbytes = Vec::new();
+        for (c, count) in encoded {
+            if let Some(&index) = metatiles.get(&c) {
+                // Stage bytes are written in two nibbles.  The first is length - 1, and the second
+                // is the index of the metatile in the stage header
+                let outbyte: u8 = (count as u8) - 1 << 4 | 0x0F & index as u8;
+                outbytes.push(outbyte);
+            }
+        }
+        write.write(&outbytes)?;
         Ok(())
     }
 }
