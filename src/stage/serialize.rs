@@ -80,7 +80,7 @@ fn run_length_encode(chars: &[char], limit: u16) -> Vec<(char, u16)> {
 }
 
 impl Stage {
-    pub fn write_binary(&self, write: &mut Write) -> Result<()> {
+    pub fn write_binary(&self, write: &mut dyn Write) -> Result<()> {
         let mut metatiles = HashMap::new();
         for (i, metatile) in self.metatiles.iter().enumerate() {
             metatiles.insert(metatile.symbol, i);
