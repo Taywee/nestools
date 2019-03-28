@@ -32,7 +32,10 @@ pub struct Metatile {
     pub symbol: char,
 
     /// Actual tiles used
-    pub tiles: Vec<u8>,
+    pub tiles: [u8; 4],
+
+    /// Attribute table pallete section
+    pub palette: u8,
 }
 
 /// Top level stage sheet type.  Holds all the data necessary to compile the stage file.
@@ -41,6 +44,12 @@ pub struct Stage {
     /// Whether the stage is serialized to be a horizontal stage or a vertical one
     #[serde(default)]
     pub orientation: Orientation,
+
+    /// Background Palette definition
+    pub background_palette: [u8; 16],
+
+    /// Sprite Palette definition
+    pub sprite_palette: [u8; 16],
 
     /// Metatiles, for specifying the sprites used to compose a tile
     pub metatiles: Vec<Metatile>,
@@ -81,15 +90,26 @@ fn run_length_encode(chars: &[char], limit: u16) -> Vec<(char, u16)> {
 
 impl Stage {
     pub fn write_binary(&self, write: &mut dyn Write) -> Result<()> {
-        let mut metatiles = HashMap::new();
-        for (i, metatile) in self.metatiles.iter().enumerate() {
-            metatiles.insert(metatile.symbol, i);
-        }
+        let metatiles: HashMap<char, u8> = self.metatiles.iter()
+            .enumerate()
+            .map(|(i, metatile)| (metatile.symbol, i as u8))
+            .collect(); 
 
-        // Write background palette 
-        // Write sprite palette
-        // Write background tile definitions
-        // Write stage body
+        // Write out the palettes literally
+        write.write(&self.background_palette)?;
+        write.write(&self.sprite_palette)?;
+
+        // Write count of metatiles, should not exceed 16
+        write.write(&[self.metatiles.len() as u8])?;
+
+        // Simple metatile information
+        for metatile in &self.metatiles {
+            // TODO: compress this more.  Palette only needs 2 bits.  This may become a general
+            // attribute byte
+            write.write(&[metatile.palette])?;
+            write.write(&metatile.tiles)?;
+        }
+        // Build list of chars for RLE
         let mut iterators: Vec<_> = self.data.lines().map(|line| line.chars()).collect();
         let mut chars = Vec::new();
         match &self.orientation {
@@ -111,7 +131,7 @@ impl Stage {
             },
         }
 
-        // Run-length encode and write stage body
+        // Run-length encode
         let encoded = run_length_encode(&chars, 16);
         let mut outbytes = Vec::new();
         for (c, count) in encoded {
@@ -122,6 +142,11 @@ impl Stage {
                 outbytes.push(outbyte);
             }
         }
+
+        // Write stage body compressed length in bytes (to allow entering the map from the other side) 
+        write.write(&[outbytes.len() as u8])?;
+
+        // Write stage body
         write.write(&outbytes)?;
         Ok(())
     }
