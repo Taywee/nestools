@@ -96,6 +96,12 @@ impl Stage {
             .collect(); 
 
         // Write out the palettes literally
+        // This could be eventually optimized a bit.  The NES only has 64 colors, so it's possible
+        // to make each palette item take 6 bits instead of 8, so the full set of 32 colors to take
+        // 24 bytes instead of 32.  Even fewer when you consider sprite palettes and the universal
+        // background color, which is just 25 colors total for a maximum necessary 19 bytes (1 for
+        // universal background and 12 colors for background and foreground palettes at 9 bytes a
+        // piece).
         write.write(&self.background_palette)?;
         write.write(&self.sprite_palette)?;
 
