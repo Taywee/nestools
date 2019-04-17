@@ -95,6 +95,15 @@ impl Stage {
             .map(|(i, metatile)| (metatile.symbol, i as u8))
             .collect(); 
 
+        // Stage attribute byte.  Determines orientation and musical track.  Currently, only
+        // orientation
+        let mut attribute_byte = match self.orientation {
+            Orientation::Horizontal => 0u8,
+            Orientation::Vertical => 0b1000000u8,
+        };
+
+        write.write(&[attribute_byte])?;
+
         // Write out the palettes literally
         // This could be eventually optimized a bit.  The NES only has 64 colors, so it's possible
         // to make each palette item take 6 bits instead of 8, so the full set of 32 colors to take
@@ -111,7 +120,8 @@ impl Stage {
         // Simple metatile information
         for metatile in &self.metatiles {
             // TODO: compress this more.  Palette only needs 2 bits.  This may become a general
-            // attribute byte
+            // attribute byte with a set of bits indicating other tile attributes, such as whether
+            // it is a ground or background tile, whether it deals damage, etc.
             write.write(&[metatile.palette])?;
             write.write(&metatile.tiles)?;
         }
